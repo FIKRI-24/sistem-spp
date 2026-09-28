@@ -13,6 +13,22 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                serif: ['"Playfair Display"', ...defaultTheme.fontFamily.serif],
+                mono: ['"Space Mono"', ...defaultTheme.fontFamily.mono],
+            },
+            colors: {
+                paper: {
+                    50: '#FDFCF9',
+                    100: '#FAF6EE',
+                    200: '#F4ECE1',
+                    300: '#E7DCcb',
+                    900: '#231F1A',
+                },
+                ink: {
+                    950: '#121211',
+                    900: '#1A1918',
+                    800: '#2B2927',
+                },
             },
         },
     },
