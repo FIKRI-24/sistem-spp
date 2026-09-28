@@ -26,42 +26,72 @@ Route::middleware('auth')->group(function () {
 | Kedua role:  Akses bersama ke modul yang diizinkan masing-masing.
 */
 
+use App\Http\Controllers\Admin\JenisPembayaranController;
+use App\Http\Controllers\Admin\JurusanController;
+use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\MasterDataController;
+use App\Http\Controllers\Admin\PengaturanSekolahController;
+use App\Http\Controllers\Admin\PotonganSiswaController;
+use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\TahunAjaranController;
+use App\Http\Controllers\Admin\TarifPembayaranController;
+
 // Routes hanya untuk Super Admin
-Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/users', function () {
         return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 4+
-    })->name('admin.users.index');
+    })->name('users.index');
 
-    Route::get('/settings', function () {
-        return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 4+
-    })->name('admin.settings.index');
+    Route::get('/settings', [PengaturanSekolahController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [PengaturanSekolahController::class, 'update'])->name('settings.update');
 
     Route::get('/audit-log', function () {
         return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 9
-    })->name('admin.audit-log.index');
+    })->name('audit-log.index');
 });
 
 // Routes untuk Super Admin & Admin (role gabungan)
-Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->group(function () {
-    Route::get('/master-data', function () {
-        return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 4
-    })->name('admin.master-data.index');
+Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data.index');
 
-    Route::get('/siswa', function () {
-        return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 4
-    })->name('admin.siswa.index');
+    // 1. Tahun Ajaran
+    Route::post('/tahun-ajaran/{tahun_ajaran}/toggle-active', [TahunAjaranController::class, 'toggleActive'])->name('tahun-ajaran.toggle-active');
+    Route::post('/tahun-ajaran/{tahun_ajaran}/toggle-lock', [TahunAjaranController::class, 'toggleLock'])->name('tahun-ajaran.toggle-lock');
+    Route::resource('/tahun-ajaran', TahunAjaranController::class)->except(['create', 'show', 'edit']);
 
+    // 2. Jurusan
+    Route::resource('/jurusan', JurusanController::class)->except(['create', 'show', 'edit']);
+
+    // 3. Kelas
+    Route::resource('/kelas', KelasController::class)->except(['create', 'show', 'edit']);
+
+    // 4. Siswa & Riwayat Kelas
+    Route::get('/siswa/{siswa}/riwayat-kelas', [SiswaController::class, 'riwayatKelas'])->name('siswa.riwayat-kelas');
+    Route::resource('/siswa', SiswaController::class);
+
+    // 5. Jenis Pembayaran
+    Route::post('/jenis-pembayaran/{jenis_pembayaran}/toggle-active', [JenisPembayaranController::class, 'toggleActive'])->name('jenis-pembayaran.toggle-active');
+    Route::resource('/jenis-pembayaran', JenisPembayaranController::class)->except(['create', 'show', 'edit']);
+
+    // 6. Tarif Pembayaran
+    Route::resource('/tarif-pembayaran', TarifPembayaranController::class)->except(['create', 'show', 'edit']);
+
+    // 7. Potongan / Diskon Siswa
+    Route::post('/potongan-siswa/{potongan_siswa}/toggle-active', [PotonganSiswaController::class, 'toggleActive'])->name('potongan-siswa.toggle-active');
+    Route::resource('/potongan-siswa', PotonganSiswaController::class)->except(['create', 'show', 'edit']);
+
+    // Placeholder untuk fase berikutnya
     Route::get('/tagihan', function () {
         return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 5
-    })->name('admin.tagihan.index');
+    })->name('tagihan.index');
 
     Route::get('/pembayaran', function () {
         return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 6
-    })->name('admin.pembayaran.index');
+    })->name('pembayaran.index');
 
     Route::get('/laporan', function () {
         return view('dashboard'); // Placeholder — akan diimplementasikan di Phase 7
-    })->name('admin.laporan.index');
+    })->name('laporan.index');
 });
 
 require __DIR__.'/auth.php';
